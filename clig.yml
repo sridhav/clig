@@ -1,0 +1,43 @@
+name: "clig"
+version: "0.0.1"
+author: "sridhav"
+vcshost: "github.com"
+description: "clig description"
+usage: "clig api"
+commands:
+  - name: "doo"
+    usage: "do the doo"
+    description: "no really"
+    flags:
+      - name: "flag"
+        type: "Bool"
+    commands:
+      - name: "doodoo"
+        usage: "do tht doodoo"
+        description: "no no really"
+      - name: "doodoo2"
+        usage: "do the doodoo2"
+        description: "no no 2 really"
+      - name: "doodoo3"
+        usage: "do the doodoo3"
+        description: "no no 3 really"
+        commands:
+          - name: "doodoodoo"
+            usage: "do the doodoodoo"
+            description: "no no no really"
+  - name: "doo2"
+    usage: "do the doo2"
+    description: "no 2 really"
+    flags:
+      - name: "flag2"
+        type: "BoolT"
+  - name: "doo3"
+    usage: "do the doo3"
+    description: "no 3 really"
+    flags:
+      - name: "flag3"
+        type: "Bool"
+      - name: "string-flag3"
+        type: "String"
+
+    

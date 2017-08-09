@@ -1,0 +1,8 @@
+    cli.Command{
+        Name: #{{ .Name }}#,
+        Usage: #{{ .Usage }}#,
+        Description: #{{ .Description}}#,
+        Subcommands: []cli.Command{
+            {{ .Buffer }}
+        },
+    },
