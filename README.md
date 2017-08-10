@@ -12,6 +12,7 @@ The project generates an cli skeletorn for a typical go cli app. You can quickly
 
 To get you started you can simply install the go application and input and yml file to generate the boilerplate code
 
+
 #### Prerequistes
 
 Firstly you need to have go installed and GOPATH set, it is necessary that your GOPATH is set or the boiler plate code is created in home directory. You can install go and set GOPATH [here](https://golang.org/doc/install#install)
@@ -27,12 +28,7 @@ Make sure your PATH includes $GOPATH/bin directory so your commands can be easil
     export PATH=$PATH:$GOPATH/bin
 
 
-### Supported Platforms
-
-CLIg is tested agains multiple versions of Go on Linux and agains the latest released version of Go on OS X. Windows should also have no problem but haven't tested it.
-
-
-### Generating the boilerplate code
+#### Generating the boilerplate code
 
 Once all the pre-requistes are satisfied, use your favorite editor to create a yml file and generate your command structure. A sample is provided [here](https://github.com/sridhav/clig/blob/master/clig.yml.dist), (will add more samples). Once your yaml file is set use the following command to generate your boilerplate code
 
@@ -49,7 +45,7 @@ The important configuration parameters. As these are required parameters in your
 `appname`   defaults to `myapp`
 
 
-### Sample YML file
+#### Sample YML file
 
 ```
 # app name required param
@@ -83,6 +79,10 @@ commands:
             - name: "flag"
               type: "Bool"
 ```
+
+### Supported Platforms
+
+CLIg is tested agains multiple versions of Go on Linux and agains the latest released version of Go on OS X. Windows should also have no problem but haven't tested it.
 
 
 ### Versus Other go cli generators
