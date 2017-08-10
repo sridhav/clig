@@ -1,4 +1,4 @@
-### CLIg 
+## CLIg 
 
 clig is a (do the needful) cli generator which generates a skeleton for your "go" based cli application. This tool creates a go seed cli project right out of the box. The current version only supports urfave/cli framework
 
