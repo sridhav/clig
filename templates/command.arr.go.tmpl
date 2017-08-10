@@ -1,7 +1,16 @@
     cli.Command{
         Name: #{{ .Name }}#,
-        Usage: #{{ .Usage }}#,
-        Description: #{{ .Description}}#,
+        {{ if ne .Usage "" }}Usage: #{{ .Usage }}#, {{ end }}
+        {{ if ne .Description "" }}Description: #{{ .Description}}#, {{ end }}
+        Action: {{ .Package }}.Cmd{{title .FuncPkg}}{{ title .Name}},
+        Flags: []cli.Flag{
+	        {{ range .Flags }}cli.{{ title .Type }}Flag{
+		        Name:   "{{ .Name }}",
+		        {{ if eq .Type "string" }}Value: "{{ .Default }}", {{ end }}
+		        {{ if ne .Usage "" }}}Usage:  "{{ .Usage }}", {{ end }}
+	        },
+	        {{ end }}
+        },
         Subcommands: []cli.Command{
             {{ .Buffer }}
         },

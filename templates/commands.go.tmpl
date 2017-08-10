@@ -5,9 +5,18 @@ import (
 	"os"
     "{{ .VCSHost }}/{{ .Author }}/{{ .Name }}/command"
 	"github.com/urfave/cli"
-	
+	{{ range .Imports }}"{{ .Name }}"
+	{{ end }}
 )
 
+var GlobalFlags = []cli.Flag{
+	{{ range .Flags }}cli.{{ title .Type }}Flag{
+		Name:   "{{ .Name }}",
+		{{ if eq .Type "string" }}Value: "{{ .Default }}", {{ end }}
+		{{ if ne .Usage "" }}}Usage:  "{{ .Usage }}", {{ end }}
+	},
+	{{ end }}
+}
 
 var Commands = []cli.Command{
 	{{ .CommandMap }}

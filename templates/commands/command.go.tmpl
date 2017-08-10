@@ -1,8 +1,12 @@
 package {{ .Package }}
 
-import "github.com/urfave/cli"
+import (
+	{{ if ne .Debug "" }}"fmt"{{ end }}
+	"github.com/urfave/cli"
+)
 
-func Cmd{{ .Name }}(c *cli.Context) error {
+func Cmd{{ .FuncPkg }}{{ title .Name }}(c *cli.Context) error {
 	// Write your code here
-		return nil
+	{{ if ne .Debug "" }}fmt.Println("{{ .Name }} : {{ .FuncPkg }} - {{ .Debug }}"){{ end }}
+	return nil
 }

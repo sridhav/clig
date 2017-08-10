@@ -1,9 +1,12 @@
-name: "clig"
+name: "cligs"
 version: "0.0.1"
 author: "sridhav"
 vcshost: "github.com"
 description: "clig description"
 usage: "clig api"
+flags:
+      - name: "hadoop"
+        type: "Bool"
 commands:
   - name: "doo"
     usage: "do the doo"
