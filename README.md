@@ -5,7 +5,7 @@ clig is a (do the needful) cli generator which generates a skeleton for your "go
 
 ### Overview
 
-The project generates an cli skeletorn for a typical go cli app. You can quickly generate the boilerplate code for you go cli projects. CLIg helps you to generate associated subcommands and flags for the given application. Using CLIg is fairly simple (no fancy things), just give an yml file as an argument and you should be good to go.
+The project generates a cli skeleton for a typical go cli app. You can quickly generate the boilerplate code for you go cli projects. CLIg also helps you to generate associated subcommands and flags for the given application. Using CLIg is fairly simple (no fancy things), just give an yml file as an argument and you should be good to go.
 
 
 ### Getting Started
