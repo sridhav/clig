@@ -25,6 +25,7 @@ type Config struct {
 	Description string
 	Usage       string
 	VCSHost     string
+	Folder      string
 	Flags       []Flag
 	Commands    []Command
 	CommandMap  string
@@ -68,7 +69,7 @@ func main() {
 	checkErr(err)
 
 	//recursive commands update
-	appPath := createAppPath(config.VCSHost, config.Author, config.Name)
+	appPath := createAppPath(config.VCSHost, config.Author, config.Name, config.Folder)
 	commandPath := appPath + "/command"
 	os.MkdirAll(commandPath, 0755)
 	imports := make([]Import, 0)
@@ -97,12 +98,12 @@ func main() {
 	checkErr(err)
 	execTemplate("./templates/main.go.tmpl", file, config)
 
-	runGoFormat(config.VCSHost, config.Author, config.Name)
+	runGoFormat(config.VCSHost, config.Author, config.Name, config.Folder)
 }
 
 // runs go format on all generated go files
-func runGoFormat(VCSHost string, user string, app string) {
-	gopath := VCSHost + "/" + user + "/" + app
+func runGoFormat(VCSHost string, user string, app string, folder string) {
+	gopath := VCSHost + "/" + user + "/" + app + "/" + folder
 	_, err := exec.Command("go", "fmt", gopath).Output()
 	checkErr(err)
 }
@@ -146,12 +147,12 @@ func camelCase(splits []string) string {
 }
 
 // Generates App Path
-func createAppPath(VCSHost string, user string, appname string) string {
+func createAppPath(VCSHost string, user string, appname string, folder string) string {
 	gopath := os.Getenv("GOPATH")
 	if len(gopath) < 1 {
 		gopath = userHomeDir() + "/go"
 	}
-	apppath := gopath + "/src/" + VCSHost + "/" + user + "/" + appname
+	apppath := gopath + "/src/" + VCSHost + "/" + user + "/" + appname + "/" + folder
 	os.MkdirAll(apppath, 0755)
 	return apppath
 }
@@ -211,6 +212,7 @@ func validation(config *Config) {
 	requiredVariable(&config.VCSHost, "config.vcshost", "github.com")
 	requiredVariable(&config.Author, "config.author", username())
 	requiredVariable(&config.Name, "config.name", randomString)
+	requiredVariable(&config.Folder, "config.folder", "")
 }
 
 func requiredVariable(variable *string, name string, def string) {
