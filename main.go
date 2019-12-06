@@ -97,7 +97,7 @@ func main() {
 
 	// Add commands.go file
 	var tempbuf bytes.Buffer
-	execTemplate("templates/commands.go.tmpl", &tempbuf, config)
+	execTemplate(getTemplatePath()+"/commands.go.tmpl", &tempbuf, config)
 	str = html.UnescapeString(tempbuf.String())
 	file, err := os.Create(appPath + "/commands.go")
 	file.WriteString(str)
@@ -107,7 +107,7 @@ func main() {
 	//Add main.go file
 	file, err = os.Create(appPath + "/main.go")
 	checkErr(err)
-	execTemplate("templates/main.go.tmpl", file, config)
+	execTemplate(getTemplatePath()+"/main.go.tmpl", file, config)
 
 	runGoFormat(config.VCSHost, config.Author, config.Name, config.Folder)
 }
@@ -145,7 +145,7 @@ func recursiveUpdate(commands []Command, callback *Command, directory string, co
 			recursiveUpdate(element.Commands, &element, directory, commandPath, imports, license)
 		}
 
-		execTemplate("templates/command.arr.go.tmpl", &buf, element)
+		execTemplate(getTemplatePath()+"/command.arr.go.tmpl", &buf, element)
 		callback.Buffer = buf.String()
 	}
 	return buf
@@ -192,7 +192,7 @@ func createCommandFile(filename string, command Command) {
 	path, _ := filepath.Abs(filename)
 	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0644)
 	checkErr(err)
-	execTemplate("templates/commands/command.go.tmpl", file, command)
+	execTemplate(getTemplatePath()+"/commands/command.go.tmpl", file, command)
 	file.Close()
 }
 
@@ -224,7 +224,7 @@ func addLicense(config *Config) {
 	path := createAppPath(config.VCSHost, config.Author, config.Name, "")
 	file, err := os.OpenFile(path+"/LICENSE", os.O_WRONLY|os.O_CREATE, 0644)
 	checkErr(err)
-	execTemplate("templates/LICENSE.tmpl", file, config.License)
+	execTemplate(getTemplatePath()+"/LICENSE.tmpl", file, config.License)
 }
 
 func updateLicense(config *Config) {
@@ -251,6 +251,12 @@ func requiredVariable(variable *string, name string, def string) {
 		fmt.Printf("WARN : Variable %s not set in yml document. Using default: %s\n", name, def)
 		*variable = def
 	}
+}
+
+func getTemplatePath() string {
+	dir, err := os.Getwd()
+	checkErr(err)
+	return dir + "/templates"
 }
 
 func usage() {
