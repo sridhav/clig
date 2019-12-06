@@ -20,6 +20,7 @@ import (
 )
 
 type Config struct {
+	Overwrite   string
 	Name        string
 	Version     string
 	Author      string
@@ -66,6 +67,8 @@ type Flag struct {
 
 var box packr.Box
 
+var overwrite bool
+
 func initBox() {
 	box = packr.NewBox("./templates")
 }
@@ -106,7 +109,7 @@ func main() {
 
 	// Add commands.go file
 	var tempbuf bytes.Buffer
-	execTemplate("commands.go.tmpl", &tempbuf, config)
+	execBufTemplate("commands.go.tmpl", &tempbuf, config)
 	str = html.UnescapeString(tempbuf.String())
 	file, err := os.Create(appPath + "/commands.go")
 	file.WriteString(str)
@@ -114,9 +117,7 @@ func main() {
 	checkErr(err)
 
 	//Add main.go file
-	file, err = os.Create(appPath + "/main.go")
-	checkErr(err)
-	execTemplate("main.go.tmpl", file, config)
+	execTemplate("main.go.tmpl", appPath+"/main.go", config)
 
 	runGoFormat(config.VCSHost, config.Author, config.Name, config.Folder)
 }
@@ -157,7 +158,7 @@ func recursiveUpdate(commands []Command, callback *Command, directory string, co
 			recursiveUpdate(element.Commands, &element, directory, commandPath, imports, license)
 		}
 
-		execTemplate("command.arr.go.tmpl", &buf, element)
+		execBufTemplate("command.arr.go.tmpl", &buf, element)
 		callback.Buffer = buf.String()
 	}
 	return buf
@@ -206,19 +207,31 @@ func username() string {
 // creates individual command files
 func createCommandFile(filename string, command Command) {
 	path, _ := filepath.Abs(filename)
-	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0644)
-	checkErr(err)
-	execTemplate("commands/command.go.tmpl", file, command)
-	file.Close()
+	execTemplate("commands/command.go.tmpl", path, command)
 }
 
 // writes templates to the writer
-func execTemplate(file string, wr io.Writer, data interface{}) {
+func execBufTemplate(file string, wr io.Writer, data interface{}) {
 	dat, err := box.Find(file)
 	tmpl, err := template.New("test").Funcs(funcMap()).Parse(string(dat))
 	checkErr(err)
 	err = tmpl.Execute(wr, data)
 	checkErr(err)
+}
+
+// writes templates to the writer
+func execTemplate(file string, outfile string, data interface{}) {
+	if !fileExists(outfile) || overwrite {
+		wr, err := os.OpenFile(outfile, os.O_WRONLY|os.O_CREATE, 0644)
+		checkErr(err)
+		dat, err := box.Find(file)
+		checkErr(err)
+		tmpl, err := template.New("test").Funcs(funcMap()).Parse(string(dat))
+		checkErr(err)
+		err = tmpl.Execute(wr, data)
+		checkErr(err)
+		wr.Close()
+	}
 }
 
 // checks error and panics
@@ -238,9 +251,7 @@ func funcMap() template.FuncMap {
 
 func addLicense(config *Config) {
 	path := createAppPath(config.VCSHost, config.Author, config.Name, "")
-	file, err := os.OpenFile(path+"/LICENSE", os.O_WRONLY|os.O_CREATE, 0644)
-	checkErr(err)
-	execTemplate("LICENSE.tmpl", file, config.License)
+	execTemplate("LICENSE.tmpl", path+"/LICENSE", config.License)
 }
 
 func updateLicense(config *Config) {
@@ -260,6 +271,10 @@ func validation(config *Config) {
 	requiredVariable(&config.Author, "config.author", username())
 	requiredVariable(&config.Name, "config.name", randomString)
 	requiredVariable(&config.Folder, "config.folder", "")
+	overwrite = false
+	if config.Overwrite == "true" {
+		overwrite = true
+	}
 }
 
 func requiredVariable(variable *string, name string, def string) {
@@ -267,6 +282,14 @@ func requiredVariable(variable *string, name string, def string) {
 		fmt.Printf("WARN : Variable %s not set in yml document. Using default: %s\n", name, def)
 		*variable = def
 	}
+}
+
+func fileExists(file string) bool {
+	ret := true
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		ret = false
+	}
+	return ret
 }
 
 func usage() {
