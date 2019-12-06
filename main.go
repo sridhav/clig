@@ -150,7 +150,7 @@ func recursiveUpdate(commands []Command, callback *Command, directory string, co
 		}
 		createCommandFile(currDirectory+"/"+element.Name+".go", element)
 		if element.Commands != nil {
-			directory = directory + "/" + element.Name
+			directory = currDirectory + "/" + element.Name
 			os.MkdirAll(directory, 0755)
 			imp := Import{Name: directory}
 			*imports = append(*imports, imp)
