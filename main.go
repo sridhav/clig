@@ -240,7 +240,7 @@ func addLicense(config *Config) {
 	path := createAppPath(config.VCSHost, config.Author, config.Name, "")
 	file, err := os.OpenFile(path+"/LICENSE", os.O_WRONLY|os.O_CREATE, 0644)
 	checkErr(err)
-	execTemplate(getTemplatePath()+"/LICENSE.tmpl", file, config.License)
+	execTemplate("LICENSE.tmpl", file, config.License)
 }
 
 func updateLicense(config *Config) {
@@ -267,12 +267,6 @@ func requiredVariable(variable *string, name string, def string) {
 		fmt.Printf("WARN : Variable %s not set in yml document. Using default: %s\n", name, def)
 		*variable = def
 	}
-}
-
-func getTemplatePath() string {
-	dir, err := os.Getwd()
-	checkErr(err)
-	return dir + "/templates"
 }
 
 func usage() {
