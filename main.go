@@ -242,8 +242,8 @@ func updateLicense(config *Config) {
 }
 
 func commentHeader(variable *string) {
-	if len(*variable) < 1 {
-		*variable = "//" + *variable
+	if len(*variable) > 1 {
+		*variable = "// " + *variable
 	}
 }
 
