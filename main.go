@@ -177,7 +177,11 @@ func createAppPath(VCSHost string, user string, appname string, folder string) s
 	if len(gopath) < 1 {
 		gopath = userHomeDir() + "/go"
 	}
-	apppath := gopath + "/src/" + VCSHost + "/" + user + "/" + appname + "/" + folder
+	apppath := gopath + "/src/" + VCSHost + "/" + user + "/" + appname
+
+	if len(folder) > 1 {
+		apppath = apppath + "/" + folder
+	}
 	os.MkdirAll(apppath, 0755)
 	return apppath
 }
