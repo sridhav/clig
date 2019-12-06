@@ -29,7 +29,14 @@ type Config struct {
 	Flags       []Flag
 	Commands    []Command
 	CommandMap  string
+	License     License
 	Imports     []Import
+}
+
+type License struct {
+	Header    string
+	Copyright string
+	Text      string
 }
 
 type Command struct {
@@ -42,6 +49,8 @@ type Command struct {
 	Package     string
 	FuncPkg     string
 	Debug       string
+	Header      string
+	Copyright   string
 }
 
 type Import struct {
@@ -64,6 +73,8 @@ func main() {
 	checkErr(err)
 	err = yaml.Unmarshal(source, &config)
 	validation(config)
+	addLicense(config)
+	updateLicense(config)
 	checkErr(err)
 	var buf bytes.Buffer
 	checkErr(err)
@@ -73,7 +84,7 @@ func main() {
 	commandPath := appPath + "/command"
 	os.MkdirAll(commandPath, 0755)
 	imports := make([]Import, 0)
-	buf = recursiveUpdate(config.Commands, &config.Commands[0], commandPath, commandPath, &imports)
+	buf = recursiveUpdate(config.Commands, &config.Commands[0], commandPath, commandPath, &imports, config.License)
 	str := strings.Replace(buf.String(), "#", "\"", -1)
 	config.CommandMap = str
 	for i, val := range imports {
@@ -104,17 +115,19 @@ func main() {
 // runs go format on all generated go files
 func runGoFormat(VCSHost string, user string, app string, folder string) {
 	gopath := VCSHost + "/" + user + "/" + app + "/" + folder
-	_, err := exec.Command("go", "fmt", gopath).Output()
-	checkErr(err)
+	_, _ = exec.Command("go", "fmt", gopath).Output()
+	// checkErr(err)
 }
 
 // recursively updates commands buffer
-func recursiveUpdate(commands []Command, callback *Command, directory string, commandPath string, imports *[]Import) bytes.Buffer {
+func recursiveUpdate(commands []Command, callback *Command, directory string, commandPath string, imports *[]Import, license License) bytes.Buffer {
 	var buf bytes.Buffer
 	currDirectory := directory
 	for _, element := range commands {
 		element.Package = path.Base(currDirectory)
 		element.FuncPkg = ""
+		element.Copyright = license.Copyright
+		element.Header = license.Header
 		funcpkg := currDirectory
 		out := strings.Split(funcpkg, commandPath)
 		if len(out) == 2 {
@@ -129,7 +142,7 @@ func recursiveUpdate(commands []Command, callback *Command, directory string, co
 			os.MkdirAll(directory, 0755)
 			imp := Import{Name: directory}
 			*imports = append(*imports, imp)
-			recursiveUpdate(element.Commands, &element, directory, commandPath, imports)
+			recursiveUpdate(element.Commands, &element, directory, commandPath, imports, license)
 		}
 
 		execTemplate("./templates/command.arr.go.tmpl", &buf, element)
@@ -207,6 +220,24 @@ func funcMap() template.FuncMap {
 	}
 }
 
+func addLicense(config *Config) {
+	path := createAppPath(config.VCSHost, config.Author, config.Name, "")
+	file, err := os.OpenFile(path+"/LICENSE", os.O_WRONLY|os.O_CREATE, 0644)
+	checkErr(err)
+	execTemplate("./templates/LICENSE.tmpl", file, config.License)
+}
+
+func updateLicense(config *Config) {
+	commentHeader(&config.License.Header)
+	commentHeader(&config.License.Copyright)
+}
+
+func commentHeader(variable *string) {
+	if len(*variable) < 1 {
+		*variable = "//" + *variable
+	}
+}
+
 func validation(config *Config) {
 	randomString := "myapp"
 	requiredVariable(&config.VCSHost, "config.vcshost", "github.com")
@@ -217,7 +248,7 @@ func validation(config *Config) {
 
 func requiredVariable(variable *string, name string, def string) {
 	if len(*variable) < 1 {
-		fmt.Println("WARN : Variable %s not set in yml document. Using default: %s", name, def)
+		fmt.Printf("WARN : Variable %s not set in yml document. Using default: %s\n", name, def)
 		*variable = def
 	}
 }
