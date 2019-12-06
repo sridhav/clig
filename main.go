@@ -15,6 +15,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/gobuffalo/packr"
 	"gopkg.in/yaml.v2"
 )
 
@@ -63,10 +64,18 @@ type Flag struct {
 	Usage   string
 }
 
+var box packr.Box
+
+func initBox() {
+	box = packr.NewBox("./templates")
+}
+
 func main() {
+
 	if len(os.Args) != 2 {
 		usage()
 	}
+	initBox()
 	filename := os.Args[1]
 	config := new(Config)
 	source, err := ioutil.ReadFile(filename)
@@ -97,7 +106,7 @@ func main() {
 
 	// Add commands.go file
 	var tempbuf bytes.Buffer
-	execTemplate(getTemplatePath()+"/commands.go.tmpl", &tempbuf, config)
+	execTemplate("commands.go.tmpl", &tempbuf, config)
 	str = html.UnescapeString(tempbuf.String())
 	file, err := os.Create(appPath + "/commands.go")
 	file.WriteString(str)
@@ -107,7 +116,7 @@ func main() {
 	//Add main.go file
 	file, err = os.Create(appPath + "/main.go")
 	checkErr(err)
-	execTemplate(getTemplatePath()+"/main.go.tmpl", file, config)
+	execTemplate("main.go.tmpl", file, config)
 
 	runGoFormat(config.VCSHost, config.Author, config.Name, config.Folder)
 }
@@ -145,7 +154,7 @@ func recursiveUpdate(commands []Command, callback *Command, directory string, co
 			recursiveUpdate(element.Commands, &element, directory, commandPath, imports, license)
 		}
 
-		execTemplate(getTemplatePath()+"/command.arr.go.tmpl", &buf, element)
+		execTemplate("command.arr.go.tmpl", &buf, element)
 		callback.Buffer = buf.String()
 	}
 	return buf
@@ -192,13 +201,13 @@ func createCommandFile(filename string, command Command) {
 	path, _ := filepath.Abs(filename)
 	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0644)
 	checkErr(err)
-	execTemplate(getTemplatePath()+"/commands/command.go.tmpl", file, command)
+	execTemplate("commands/command.go.tmpl", file, command)
 	file.Close()
 }
 
 // writes templates to the writer
 func execTemplate(file string, wr io.Writer, data interface{}) {
-	dat, err := ioutil.ReadFile(file)
+	dat, err := box.Find(file)
 	tmpl, err := template.New("test").Funcs(funcMap()).Parse(string(dat))
 	checkErr(err)
 	err = tmpl.Execute(wr, data)
