@@ -123,7 +123,10 @@ func main() {
 
 // runs go format on all generated go files
 func runGoFormat(VCSHost string, user string, app string, folder string) {
-	gopath := VCSHost + "/" + user + "/" + app + "/" + folder
+	gopath := VCSHost + "/" + user + "/" + app
+	if len(folder) > 1 {
+		gopath = VCSHost + "/" + user + "/" + app + "/" + folder
+	}
 	_, _ = exec.Command("go", "fmt", gopath).Output()
 	// checkErr(err)
 }
